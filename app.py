@@ -101,7 +101,7 @@ def create_app():
                     return render_template('signup.html', error="User already exists")
                 hashed_password = generate_password_hash(password)
                 db.users.insert_one({"username": username, "password": hashed_password})
-                return redirect(url_for('login'))
+                return redirect(url_for('onboard'))#return redirect(url_for('onboarding'))
         return render_template('signup.html')
 
     @app.route("/logout")
@@ -145,6 +145,37 @@ def create_app():
     def add_diet():
         return render_template("addMeal.html")
     
+    @app.route("/onboard")
+    def onboard():
+        return render_template("Onboarding.html")
+    
+    @app.route("/onboarding", methods = ["POST"])
+    def onboarding():
+        db = app.config['db']
+        if db:
+            week = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+            
+            for day in week:
+                workout_data = {
+                    "day" : day,
+                    "workout_type": request.form.get(day),
+                    "dbType": "workout",
+                    "user": current_user.username
+                }
+                db.messages.insert_one(workout_data)
+        
+            diet_data = {
+                "calories": request.form.get("calories"),
+                "protein": request.form.get("protein"),
+                "carbohydrates": request.form.get("carbohydrates"),
+                "fat": request.form.get("fat"),
+                "dbType": "diet",
+                "user": current_user.username
+            }
+            db.messages.insert_one(diet_data)
+
+        return redirect(url_for('login'))
+
     
     @app.route("/showBoth")
     @login_required
