@@ -32,6 +32,11 @@
             </select>
         </form>
 
+        <form method="post" action="{{ url_for('diets') }}">
+            <input type="text" name="search_query" placeholder="Search diets" value="{{ search_query }}">
+            <button type="submit">Search</button>
+        </form>
+
         {% for doc in docs %}
         <div class = "databox"> 
             <h2 >{{doc.meal_name}}</h2>

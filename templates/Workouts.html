@@ -28,6 +28,11 @@
             </select>
         </form>
 
+        <form method="post" action="{{ url_for('workouts') }}">
+            <input type="text" name="search_query" placeholder="Search workouts" value="{{ search_query }}">
+            <button type="submit">Search</button>
+        </form>
+
       {% for doc in docs %}
       <div class = "databox"> 
         <h2 >{{doc.workout_description}}</h2>

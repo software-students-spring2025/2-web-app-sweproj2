@@ -61,6 +61,9 @@ def create_app():
         cxn.admin.command("ping")
         print(" *", "Connected to MongoDB!")
         
+        # Create text index for search functionality
+        db.messages.create_index([("workout_description", "text"), ("meal_name", "text")])
+        
     except Exception as e: 
         print(" * MongoDB connection error:", e)
         db = None
@@ -117,8 +120,12 @@ def create_app():
         sort_order = request.form.get("sort_order", "desc")
         sort_by = request.form.get("sort_by", "created_at")
         sort_direction = -1 if sort_order == "desc" else 1
-        docs = db.messages.find({"dbType": "Workouts", "user": current_user.username}).sort(sort_by, sort_direction)
-        return render_template('Workouts.html', docs=docs, sort_order=sort_order, sort_by=sort_by)
+        search_query = request.form.get("search_query", "")
+        query = {"dbType": "Workouts", "user": current_user.username}
+        if search_query:
+            query["$text"] = {"$search": search_query}
+        docs = db.messages.find(query).sort(sort_by, sort_direction)
+        return render_template('Workouts.html', docs=docs, sort_order=sort_order, sort_by=sort_by, search_query=search_query)
     
     @app.route("/diets", methods=["GET", "POST"])
     @login_required
@@ -127,8 +134,12 @@ def create_app():
         sort_order = request.form.get("sort_order", "desc")
         sort_by = request.form.get("sort_by", "created_at")
         sort_direction = -1 if sort_order == "desc" else 1
-        docs = db.messages.find({"dbType": "diet", "user": current_user.username}).sort(sort_by, sort_direction)
-        return render_template('Diet.html', docs=docs, sort_order=sort_order, sort_by=sort_by)
+        search_query = request.form.get("search_query", "")
+        query = {"dbType": "diet", "user": current_user.username}
+        if search_query:
+            query["$text"] = {"$search": search_query}
+        docs = db.messages.find(query).sort(sort_by, sort_direction)
+        return render_template('Diet.html', docs=docs, sort_order=sort_order, sort_by=sort_by, search_query=search_query)
     
     @app.route("/settings")
     @login_required
