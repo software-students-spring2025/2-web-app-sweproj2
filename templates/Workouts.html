@@ -2,29 +2,30 @@
 <html>
     <head>
         <title>Workout App</title>
-        <link rel="stylesheet" href = "style.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
     <body>
         <header>
-          <h1>Workout App</h1>
+          <h1 class="heading">Workout App</h1>
           <nav>
-            <a href="Home.html">Home</a>
-            <a href="Workouts.html">Workouts</a>
-            <a href="Diet.html">Diet</a>
-            <a href="Settings.html">Settings</a>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('workouts') }}">Workouts</a>
+            <a href="{{ url_for('diets') }}">Diet</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
           </nav>
         </header>
         
+      {% for doc in docs %}
       <div class = "databox"> 
-        <h2 >Example Workout</h2>
-          <h3>Data and time</h3>
-          <p>Workout Type</p>
+        <h2 >{{doc.workout_description}}</h2>
+          <h3>{{doc.date.strftime("%d %B %Y")}}</h3>
+          <p>{{doc.workout_type}}</p>
       </div>
-
+      {%endfor%}
       </div>
 
     <footer>
-    <a href="addWorkout.html" class = "circleButton add">Add</a>
+    <a href="{{url_for('add_workout')}}" class = "circleButton add">Add</a>
     <a href="" class = "circleButton edit">Edit</a>
     </footer>
     </body>

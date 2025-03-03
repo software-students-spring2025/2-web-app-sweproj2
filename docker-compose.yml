@@ -1,14 +1,29 @@
+version: "3"
 services:
-  mongodb:
-    image: mongo:5.0
-    container_name: mongodb
+  flask-app:
+    build: .
     ports:
-      - "27017:27017"
+      - 10000:5000
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      - MONGO_DBNAME=fitness-app
+      - MONGO_URI=mongodb://admin:secret@mongodb:27017
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - FLASK_PORT=10000
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+
+  mongodb:
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+    image: mongo
+    ports:
+      - 27017:27017
     volumes:
-      - mongo-data:/data/db
+      - mongodb-data:/data/db
 
 volumes:
-  mongo-data:
+  mongodb-data:
