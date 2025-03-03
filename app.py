@@ -16,7 +16,7 @@ def start_docker_compose():
         print(" * Error starting Docker containers:", e)
         print(" * Output:", e.output)
         print(" * Return code:", e.returncode)
-
+start_docker_compose()
 def create_app(): 
     app = Flask(__name__, static_folder='static')
     app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
@@ -44,7 +44,7 @@ def create_app():
         return None
     
     # Start Docker containers
-    # start_docker_compose()
+    # 
     
     # MongoDB connection with error handling
     try:
@@ -70,7 +70,6 @@ def create_app():
     
     @app.route("/")
     @login_required
-
     def home():
         return render_template('Home.html', username=current_user.username)
 
@@ -111,17 +110,25 @@ def create_app():
         logout_user()
         return redirect(url_for('login'))
 
-    @app.route("/workouts")
+    @app.route("/workouts", methods=["GET", "POST"])
     @login_required
     def workouts():
-        docs = db.messages.find({"dbType": "Workouts"}).sort("created_at", -1)
-        return render_template('Workouts.html', docs=docs)
+        db = app.config["db"]
+        sort_order = request.form.get("sort_order", "desc")
+        sort_by = request.form.get("sort_by", "created_at")
+        sort_direction = -1 if sort_order == "desc" else 1
+        docs = db.messages.find({"dbType": "Workouts", "user": current_user.username}).sort(sort_by, sort_direction)
+        return render_template('Workouts.html', docs=docs, sort_order=sort_order, sort_by=sort_by)
     
-    @app.route("/diets")
+    @app.route("/diets", methods=["GET", "POST"])
     @login_required
     def diets():
-        docs = db.messages.find({"dbType": "diet"}).sort("created_at", -1)
-        return render_template('Diet.html', docs=docs)
+        db = app.config["db"]
+        sort_order = request.form.get("sort_order", "desc")
+        sort_by = request.form.get("sort_by", "created_at")
+        sort_direction = -1 if sort_order == "desc" else 1
+        docs = db.messages.find({"dbType": "diet", "user": current_user.username}).sort(sort_by, sort_direction)
+        return render_template('Diet.html', docs=docs, sort_order=sort_order, sort_by=sort_by)
     
     @app.route("/settings")
     @login_required
@@ -144,15 +151,15 @@ def create_app():
     def showBoth():
         # Add correct Database call (get all docs in the database to display)
         db = app.config['db']
-        if db:
-            docs = list(db.messages.find())
+        if db is not None:
+            docs = list(db.messages.find({"user": current_user.username}))
         return render_template('showBothScreen' , docs = docs) # Add the correct name for template
 
     @app.route("/create/<dbType>" , methods=["POST"])
     @login_required
     def create_post(dbType):
         db = app.config['db']
-        if db:
+        if db is not None:
             if request.form.get("time") == "":
                     time = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
             else: 
@@ -167,6 +174,7 @@ def create_app():
                     "carbohydrates": request.form.get("carbohydrates"),
                     "fat": request.form.get("fat"),
                     "date": time,
+                    "created_at": datetime.datetime.utcnow(),
                     "dbType": "diet",
                     "user": current_user.username
                 }
@@ -177,6 +185,7 @@ def create_app():
                     "workout_description": request.form.get("Workout"),
                     "workout_type": request.form.get("WorkoutType"),
                     "date": time,
+                    "created_at": datetime.datetime.utcnow(),
                     "dbType": "Workouts",
                     "user": current_user.username
                 }
@@ -191,8 +200,8 @@ def create_app():
     def edit(post_id): 
         # Add correct Database call (Find the document from Database from the post_id)
         db = app.config["db"]
-        if db:
-            docs = db.messages.find_one({"_id": ObjectId(post_id)})
+        if db is not None:
+            docs = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
         return render_template('editDocument', docs=docs) # Add the correct name for template
 
     @app.route("/edit/<post_id>/<dbType>" , methods = ["POST"])
@@ -201,7 +210,7 @@ def create_app():
         # Get the values from the fields 
         # Make a document and import it into the Database
         db = app.config["db"]
-        if db:
+        if db is not None:
             if dbType == 'Diet': 
                 updated_data = {
                     "meal_name": request.form.get("meal_name"),
@@ -228,9 +237,17 @@ def create_app():
     def delete(post_id):
         # Delete the document from the Database
         db = app.config["db"]
-        if db:
-            db.messages.delete_one({"_id": ObjectId(post_id)})
+        if db is not None:
+            db.messages.delete_one({"_id": ObjectId(post_id), "user": current_user.username})
         return redirect(url_for('showBoth'))
+
+    @app.route("/delete_all_data", methods=["POST"])
+    @login_required
+    def delete_all_data():
+        db = app.config["db"]
+        if db is not None:
+            db.messages.delete_many({"user": current_user.username})
+        return redirect(url_for('home'))
 
     @app.errorhandler(Exception)
     def handle_error(e): 
