@@ -16,7 +16,7 @@ def start_docker_compose():
         print(" * Error starting Docker containers:", e)
         print(" * Output:", e.output)
         print(" * Return code:", e.returncode)
-start_docker_compose()
+#start_docker_compose()
 def create_app(): 
     app = Flask(__name__, static_folder='static')
     app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
@@ -263,14 +263,23 @@ def create_app():
             db.messages.update_one({"_id": ObjectId(post_id)}, {"$set": updated_data})
         return redirect(url_for('showBoth'))
 
-    @app.route("/delete/<post_id>")
+    @app.route("/deleteWorkout/<post_id>")
     @login_required
-    def delete(post_id):
+    def deleteWorkout(post_id):
         # Delete the document from the Database
         db = app.config["db"]
         if db is not None:
             db.messages.delete_one({"_id": ObjectId(post_id), "user": current_user.username})
-        return redirect(url_for('showBoth'))
+        return redirect(url_for('workouts'))
+    
+    @app.route("/deleteDiet/<post_id>")
+    @login_required
+    def deleteDiet(post_id):
+        # Delete the document from the Database
+        db = app.config["db"]
+        if db is not None:
+            db.messages.delete_one({"_id": ObjectId(post_id), "user": current_user.username})
+        return redirect(url_for('diets'))
 
     @app.route("/delete_all_data", methods=["POST"])
     @login_required

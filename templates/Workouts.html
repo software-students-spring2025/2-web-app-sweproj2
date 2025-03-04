@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>Workout App</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
     </head>
     <body>
         <header>
@@ -30,6 +30,7 @@
 
       {% for doc in docs %}
       <div class = "databox"> 
+        <a href="{{ url_for('deleteWorkout', post_id=doc._id)}}"> Delete</a>
         <h2 >{{doc.workout_description}}</h2>
           <h3>{{doc.date.strftime("%d %B %Y %H:%M:%S")}}</h3>
           <p>{{doc.workout_type}}</p>
