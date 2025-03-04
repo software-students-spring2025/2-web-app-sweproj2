@@ -13,12 +13,11 @@
 
         <form id="submitForm" method="POST" action="{{url_for('onboarding')}}" class = "inputArea">
             <h3>Workout Plan</h3>
-            {% set workout_options = ["Legs","Arms","Push","Pull","Back"]}
             {% for day in ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"] %}
                 <label for="{{ day }}_workout">{{ day }}'s Workout:</label>
                 <select name="{{day}}" id="{{day}}_workout" required>
                     <option value="" selected disabled>Select a workout</option>
-                    {% for workout in workout_options %}
+                    {% for workout in ["Legs","Arms","Push","Pull","Back"] %}
                         <option value="{{workout}}">{{workout}}</option>
                     {% endfor %}
                 </select>

@@ -2,16 +2,18 @@
 <html>
 <head>
     <title>Settings - Edit Goals</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <main>
-        <h2>Edit Your Goals</h2>
-        <form action="{{ url_for('setting') }}" method="POST">
+        <header>
+        <h1 class="heading">Edit Your Goals</h1>
+        </header>
+        <form action="{{ url_for('setting') }}" method="POST" class="inputArea">
             <h3>Workout Goals</h3>
             {% set workout_options = ["Legs","Arms","Push","Pull","Back"]%}
             {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
-                <label for="{{ day }}">{{ day }}'s Workout':</label>
+                <label for="{{ day }}">{{ day }}'s Workout:</label>
                 <select name="{{ day }}" id="{{day}}_workout">
                     <option value="legs" {% if workout_goals[day] == 'legs' %}selected{% endif %}>Legs</option>
                     <option value="arms" {% if workout_goals[day] == 'arms' %}selected{% endif %}>Arms</option>

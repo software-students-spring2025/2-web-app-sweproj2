@@ -194,6 +194,7 @@ def create_app():
         return render_template("Onboarding.html")
     
     @app.route("/onboarding", methods = ["POST"])
+    @login_required
     def onboarding():
         db = app.config['db']
         if db:
