@@ -133,7 +133,51 @@ def create_app():
     @app.route("/settings")
     @login_required
     def settings():
-        return render_template("Home.html")
+        db = app.config['db']
+        if db is not None:
+            week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            workout_goals = {}
+            for day in week:
+                goal = db.messages.find_one({"dbType": 'workout_goal', 'user': current_user.username, 'day': day})
+                workout_goals[day] = goal['workout_type'] if goal else None
+
+            diet_goals = db.messages.find_one({"dbType": 'diet_goal', 'user': current_user.username})
+
+            return render_template('Settings.html', workout_goals=workout_goals, diet_goals=diet_goals)
+    
+    @app.route("/setting", methods = ["POST"])
+    @login_required
+    def setting():
+        db=app.config['db']
+        if db is not None:
+            week = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+            for day in week:
+                workout_data = {
+                    "day": day,
+                    "workout_type": request.form.get(day),
+                    "dbType": "workout_goal",
+                    "user": current_user.username
+                }
+                db.messages.update_one(
+                    {"user": current_user.username, "dbType":"workout_goal", "day": day},
+                    {"$set": workout_data},
+                    upsert=True
+                )
+            
+            diet_data={
+                'calories': request.form.get('calories'),
+                'protein': request.form.get('protein'),
+                'carbohydrates': request.form.get('carbohydrates'),
+                'fat': request.form.get('fat'),
+                "dbType": "diet_goal",
+                "user": current_user.username
+            }
+            db.messages.update_one(
+                {'dbType': 'diet_goal', 'user': current_user.username},
+                {"$set": diet_data},
+                upsert=True
+            )
+        return redirect(url_for('home'))
     
     @app.route("/add_workout")
     @login_required
@@ -159,7 +203,7 @@ def create_app():
                 workout_data = {
                     "day" : day,
                     "workout_type": request.form.get(day),
-                    "dbType": "workout",
+                    "dbType": "workout_goal",
                     "user": current_user.username
                 }
                 db.messages.insert_one(workout_data)
@@ -169,7 +213,7 @@ def create_app():
                 "protein": request.form.get("protein"),
                 "carbohydrates": request.form.get("carbohydrates"),
                 "fat": request.form.get("fat"),
-                "dbType": "diet",
+                "dbType": "diet_goal",
                 "user": current_user.username
             }
             db.messages.insert_one(diet_data)

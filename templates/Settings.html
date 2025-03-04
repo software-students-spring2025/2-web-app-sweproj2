@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Settings - Edit Goals</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main>
+        <h2>Edit Your Goals</h2>
+        <form action="{{ url_for('setting') }}" method="POST">
+            <h3>Workout Goals</h3>
+            {% set workout_options = ["Legs","Arms","Push","Pull","Back"]%}
+            {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                <label for="{{ day }}">{{ day }}'s Workout':</label>
+                <select name="{{ day }}" id="{{day}}_workout">
+                    <option value="legs" {% if workout_goals[day] == 'legs' %}selected{% endif %}>Legs</option>
+                    <option value="arms" {% if workout_goals[day] == 'arms' %}selected{% endif %}>Arms</option>
+                    <option value="push" {% if workout_goals[day] == 'push' %}selected{% endif %}>Push</option>
+                    <option value="pull" {% if workout_goals[day] == 'pull' %}selected{% endif %}>Pull</option>
+                    <option value="back" {% if workout_goals[day] == 'back' %}selected{% endif %}>Back</option>
+                </select>
+                <br>
+            {% endfor %}
+
+            <h3>Diet Goals</h3>
+            <label for="calories">Calories:</label>
+            <input type="number" name="calories" value="{{ diet_goals['calories']}}"><br>
+
+            <label for="protein">Protein:</label>
+            <input type="number" name="protein" value="{{ diet_goals['protein']}}"><br>
+
+            <label for="carbohydrates">Carbohydrates:</label>
+            <input type="number" name="carbohydrates" value="{{ diet_goals['carbohydrates']}}"><br>
+
+            <label for="fat">Fat:</label>
+            <input type="number" name="fat" value="{{ diet_goals['fat']}}"><br>
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </main>
+
+    <footer>
+        <a href="{{ url_for('home') }}" class="button">Back to Home</a>
+    </footer>
+</body>
+</html>
