@@ -7,7 +7,10 @@ from bson.objectid import ObjectId
 from dotenv import load_dotenv
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from pymongo.server_api import ServerApi
 
+# Remove or comment out the docker-compose function
+"""
 def start_docker_compose():
     try:
         subprocess.run(["docker-compose", "up", "-d"], check=True)
@@ -16,7 +19,8 @@ def start_docker_compose():
         print(" * Error starting Docker containers:", e)
         print(" * Output:", e.output)
         print(" * Return code:", e.returncode)
-#start_docker_compose()
+"""
+
 def create_app(): 
     app = Flask(__name__, static_folder='static')
     app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
@@ -43,8 +47,6 @@ def create_app():
                 return User(user_id, user_data["username"])
         return None
     
-    # Start Docker containers
-    # 
     
     # MongoDB connection with error handling
     try:
@@ -56,10 +58,17 @@ def create_app():
         if not db_name:
             raise ValueError("MONGO_DBNAME not found in environment variables")
             
-        cxn = pymongo.MongoClient(mongo_uri)
+        # Update MongoDB connection to use retry writes and server API
+        cxn = pymongo.MongoClient(
+            mongo_uri,
+            server_api=ServerApi('1'),
+            retryWrites=True,
+            w='majority'
+        )
         db = cxn[db_name]
+        # Test connection
         cxn.admin.command("ping")
-        print(" *", "Connected to MongoDB!")
+        print(" * Connected to MongoDB Atlas!")
         
         # Create text index for search functionality
         db.messages.create_index([("workout_description", "text"), ("meal_name", "text")])
@@ -448,4 +457,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
