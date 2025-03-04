@@ -20,8 +20,8 @@
         <form id="submitForm" method="POST" action="{{ url_for('create_post' , dbType = 'Diet') }}" class = "inputArea">
           <label for="meal">Meal Description:</label>
           <input type="text" id="Workout" name="meal_name"><br>
-          <label for="time">Time:</label>
-          <input type="text" id="time" name="time" placeholder="(Leave blank if current time)"><br>
+          <label for="time">Time (leave blank for current time):</label>
+          <input type="time" id="time" name="time"><br>
           <label for="Calorie">Calories:</label>
           <input type="number" id="Calorie" name="calories" min="0"><br>
           <label for="Protein">Protein:</label>

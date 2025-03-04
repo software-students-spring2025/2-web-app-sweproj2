@@ -74,7 +74,20 @@ def create_app():
     @app.route("/")
     @login_required
     def home():
-        return render_template('Home.html', username=current_user.username)
+        db = app.config["db"]
+        workout_goal = None
+        diet_goal = None
+        if db is not None:
+            today = datetime.datetime.today().strftime('%A')
+            workout_goal_data = db.messages.find_one({"dbType": "workout_goal", "user": current_user.username, "day": today})
+            if workout_goal_data:
+                workout_goal = workout_goal_data.get("workout_type")
+            
+            diet_goal_data = db.messages.find_one({"dbType": "diet_goal", "user": current_user.username})
+            if diet_goal_data:
+                diet_goal = f"Calories: {diet_goal_data.get('calories')}, Protein: {diet_goal_data.get('protein')}, Carbs: {diet_goal_data.get('carbohydrates')}, Fat: {diet_goal_data.get('fat')}"
+        
+        return render_template('Home.html', username=current_user.username, workout_goal=workout_goal, diet_goal=diet_goal)
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -254,15 +267,23 @@ def create_app():
     def create_post(dbType):
         db = app.config['db']
         if db is not None:
+            current_time = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
+            
             if request.form.get("time") == "":
-                    time = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
-            else: 
-                time = datetime.datetime.strptime(request.form.get("time"), "%Y-%m-%d")
+                time = current_time
+            else:
+                # Get just the time from the form and combine with today's date
+                time_str = request.form.get("time")
+                today = current_time.date()
+                try:
+                    time_obj = datetime.datetime.strptime(time_str, "%H:%M").time()
+                    time = datetime.datetime.combine(today, time_obj)
+                except ValueError:
+                    time = current_time
 
-            if dbType == 'Diet': #would it be called diet
+            if dbType == 'Diet':
                 data = {
                     "meal_name": request.form.get("meal_name"),
-                    "time" : request.form.get("time"), 
                     "calories": request.form.get("calories"),
                     "protein": request.form.get("protein"),
                     "carbohydrates": request.form.get("carbohydrates"),
@@ -274,7 +295,7 @@ def create_app():
                 }
                 db.messages.insert_one(data)
                 return redirect(url_for('diets'))
-            elif dbType == 'Workouts': #same question as above
+            elif dbType == 'Workouts':
                 data = {
                     "workout_description": request.form.get("Workout"),
                     "workout_type": request.form.get("WorkoutType"),
@@ -353,6 +374,71 @@ def create_app():
         if db is not None:
             db.messages.delete_many({"user": current_user.username})
         return redirect(url_for('home'))
+
+    @app.route("/edit_workout/<post_id>")
+    @login_required
+    def edit_workout(post_id):
+        db = app.config["db"]
+        if db is not None:
+            doc = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
+            if doc:
+                return render_template('editWorkout.html', doc=doc)
+        return redirect(url_for('workouts'))
+
+    @app.route("/edit_diet/<post_id>")
+    @login_required
+    def edit_diet(post_id):
+        db = app.config["db"]
+        if db is not None:
+            doc = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
+            if doc:
+                return render_template('editDiet.html', doc=doc)
+        return redirect(url_for('diets'))
+
+    @app.route("/update_workout/<post_id>", methods=["POST"])
+    @login_required
+    def update_workout(post_id):
+        db = app.config["db"]
+        if db is not None:
+            if request.form.get("time") == "":
+                time = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
+            else:
+                time = datetime.datetime.strptime(request.form.get("time"), "%Y-%m-%dT%H:%M")
+
+            updated_data = {
+                "workout_description": request.form.get("Workout"),
+                "workout_type": request.form.get("WorkoutType"),
+                "date": time
+            }
+            db.messages.update_one(
+                {"_id": ObjectId(post_id), "user": current_user.username},
+                {"$set": updated_data}
+            )
+        return redirect(url_for('workouts'))
+
+    @app.route("/update_diet/<post_id>", methods=["POST"])
+    @login_required
+    def update_diet(post_id):
+        db = app.config["db"]
+        if db is not None:
+            if request.form.get("time") == "":
+                time = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
+            else:
+                time = datetime.datetime.strptime(request.form.get("time"), "%Y-%m-%dT%H:%M")
+
+            updated_data = {
+                "meal_name": request.form.get("meal_name"),
+                "calories": request.form.get("calories"),
+                "protein": request.form.get("protein"),
+                "carbohydrates": request.form.get("carbohydrates"),
+                "fat": request.form.get("fat"),
+                "date": time
+            }
+            db.messages.update_one(
+                {"_id": ObjectId(post_id), "user": current_user.username},
+                {"$set": updated_data}
+            )
+        return redirect(url_for('diets'))
 
     @app.errorhandler(Exception)
     def handle_error(e): 

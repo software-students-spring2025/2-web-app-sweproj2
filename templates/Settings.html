@@ -2,17 +2,29 @@
 <html>
 <head>
     <title>Settings - Edit Goals</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+    <header>
+        <h1>Settings</h1>
+    </header>
     <main>
+        <div class="infobox account-actions">
+            <h2>Account Actions</h2>
+            <div class="button-group">
+                <a href="{{ url_for('logout') }}" class="button action-button">Logout</a>
+                <form action="{{ url_for('delete_all_data') }}" method="POST">
+                    <button type="submit" class="action-button danger-button">Delete All Data</button>
+                </form>
+            </div>
+        </div>
         <h2>Edit Your Goals</h2>
         <form action="{{ url_for('setting') }}" method="POST">
             <h3>Workout Goals</h3>
-            {% set workout_options = ["Legs","Arms","Push","Pull","Back"]%}
+            {% set workout_options = ["Legs","Arms","Push","Pull","Back"] %}
             {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
-                <label for="{{ day }}">{{ day }}'s Workout':</label>
-                <select name="{{ day }}" id="{{day}}_workout">
+                <label for="{{ day }}">{{ day }}'s Workout:</label>
+                <select name="{{ day }}" id="{{ day }}_workout">
                     <option value="legs" {% if workout_goals[day] == 'legs' %}selected{% endif %}>Legs</option>
                     <option value="arms" {% if workout_goals[day] == 'arms' %}selected{% endif %}>Arms</option>
                     <option value="push" {% if workout_goals[day] == 'push' %}selected{% endif %}>Push</option>
@@ -24,21 +36,22 @@
 
             <h3>Diet Goals</h3>
             <label for="calories">Calories:</label>
-            <input type="number" name="calories" value="{{ diet_goals['calories']}}"><br>
+            <input type="number" name="calories" value="{{ diet_goals['calories'] }}"><br>
 
             <label for="protein">Protein:</label>
-            <input type="number" name="protein" value="{{ diet_goals['protein']}}"><br>
+            <input type="number" name="protein" value="{{ diet_goals['protein'] }}"><br>
 
             <label for="carbohydrates">Carbohydrates:</label>
-            <input type="number" name="carbohydrates" value="{{ diet_goals['carbohydrates']}}"><br>
+            <input type="number" name="carbohydrates" value="{{ diet_goals['carbohydrates'] }}"><br>
 
             <label for="fat">Fat:</label>
-            <input type="number" name="fat" value="{{ diet_goals['fat']}}"><br>
+            <input type="number" name="fat" value="{{ diet_goals['fat'] }}"><br>
 
-            <button type="submit">Save Changes</button>
+            <button type="submit" class="button">Save Changes</button>
         </form>
-    </main>
 
+        
+    </main>
     <footer>
         <a href="{{ url_for('home') }}" class="button">Back to Home</a>
     </footer>

@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Diet App</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    </head>
-    <body>
-        <header>
-          <h1 class="heading">Diet App</h1>
-          <nav>
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('workouts') }}">Workouts</a>
-            <a href="{{ url_for('diets') }}">Diet</a>
-            <a href="{{ url_for('settings') }}">Settings</a>
-          </nav>
-        </header>
-        
+<head>
+    <title>Diet App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Diet App</h1>
+    </header>
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('workouts') }}">Workouts</a>
+        <a href="{{ url_for('diets') }}">Diet</a>
+        <a href="{{ url_for('settings') }}">Settings</a>
+    </nav>
+    <main>
         <form method="post" action="{{ url_for('diets') }}" id="sortForm">
             <label for="sort_by">Sort by:</label>
             <select name="sort_by" id="sort_by" onchange="this.form.submit();">
@@ -34,28 +34,32 @@
 
         <form method="post" action="{{ url_for('diets') }}">
             <input type="text" name="search_query" placeholder="Search diets" value="{{ search_query }}">
-            <button type="submit">Search</button>
+            <button type="submit" class="button">Search</button>
         </form>
 
         {% for doc in docs %}
-        <div class = "databox"> 
-            <a href="{{ url_for('deleteDiet', post_id=doc._id)}}"> Delete</a>
-            <h2 >{{doc.meal_name}}</h2>
-            {% if doc.date %}
-            <h3>{{doc.date.strftime("%d %B %Y %H:%M:%S")}}</h3>
-            {% endif %}
-            <div style="text-align: left; line-height: 25%;">
-                <h3>Calories: {{doc.calories}}</h3>
-                <p>Protein: {{doc.protein}}</p>
-                <p>Carbohydrates: {{doc.carbohydrates}}</p>
-                <p>Fat: {{doc.fat}}</p>
+        <div class="databox">
+            <div class="data-content">
+                <h2>{{ doc.meal_name }}</h2>
+                {% if doc.date %}
+                <h3>{{ doc.date.strftime("%d %B %Y %H:%M:%S") }}</h3>
+                {% endif %}
+                <div class="stats">
+                    <h3>Calories: {{ doc.calories }}</h3>
+                    <p>Protein: {{ doc.protein }}</p>
+                    <p>Carbohydrates: {{ doc.carbohydrates }}</p>
+                    <p>Fat: {{ doc.fat }}</p>
+                </div>
+            </div>
+            <div class="data-actions">
+                <a href="{{ url_for('edit_diet', post_id=doc._id)}}" class="button">Edit</a>
+                <a href="{{ url_for('deleteDiet', post_id=doc._id)}}" class="button">Delete</a>
             </div>
         </div>
-        {%endfor%}
-        
+        {% endfor %}
+    </main>
     <footer>
-    <a href="{{ url_for('add_diet') }}" class = "circleButton add">Add</a>
-    <a href="" class = "circleButton edit">Edit</a>
+        <a href="{{ url_for('add_diet') }}" class="circleButton add">+</a>
     </footer>
-    </body>
+</body>
 </html>

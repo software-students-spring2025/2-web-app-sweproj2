@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Edit Diet Entry</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <body>
+        <header>
+          <h1 class="heading">Edit Diet Entry</h1>
+          <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('workouts') }}">Workouts</a>
+            <a href="{{ url_for('diets') }}">Diet</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
+          </nav>
+        </header>
+
+        <form id="submitForm" method="POST" action="{{ url_for('update_diet', post_id=doc._id) }}" class="inputArea">
+          <label for="meal">Meal Description:</label>
+          <input type="text" id="Workout" name="meal_name" value="{{ doc.meal_name }}"><br>
+          <label for="time">Time:</label>
+          <input type="datetime-local" id="time" name="time" value="{{ doc.date.strftime('%Y-%m-%dT%H:%M') if doc.date else '' }}"><br>
+          <label for="Calorie">Calories:</label>
+          <input type="number" id="Calorie" name="calories" min="0" value="{{ doc.calories }}"><br>
+          <label for="Protein">Protein:</label>
+          <input type="number" id="Protein" name="protein" min="0" value="{{ doc.protein }}"><br>
+          <label for="Carbs">Carbohydrates:</label>
+          <input type="number" id="Carbs" name="carbohydrates" min="0" value="{{ doc.carbohydrates }}"><br>
+          <label for="Fat">Fat:</label>
+          <input type="number" id="Fat" name="fat" min="0" value="{{ doc.fat }}"><br>
+
+          <input type="submit" value="Update">
+        </form>
+    </body>
+</html>
