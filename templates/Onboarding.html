@@ -12,7 +12,7 @@
         <h1>Set your goals!</h1>
         <form id="submitForm" method="POST" action="{{ url_for('onboarding') }}" class="inputArea">
             <h3>Workout Plan</h3>
-            {% set workout_options = ["Legs","Arms","Push","Pull","Back"] %}
+            {% set workout_options = ["Rest","Legs","Arms","Push","Pull","Back"] %}
             {% for day in ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"] %}
                 <label for="{{ day }}_workout">{{ day }}'s Workout:</label>
                 <select name="{{ day }}" id="{{ day }}_workout" required>
@@ -26,13 +26,13 @@
 
             <h3>Diet Plan</h3>
             <label for="Calorie">Calories:</label>
-            <input type="number" id="Calorie" name="calories" min="0" required><br>
-            <label for="Protein">Protein:</label>
-            <input type="number" id="Protein" name="protein" min="0" required><br>
-            <label for="Carbs">Carbohydrates:</label>
-            <input type="number" id="Carbs" name="carbohydrates" min="0" required><br>
-            <label for="Fat">Fat:</label>
-            <input type="number" id="Fat" name="fat" min="0" required><br>
+            <input type="number" id="Calorie" name="calories" min="0" value ="2250" required><br>
+            <label for="Protein">Protein (grams):</label>
+            <input type="number" id="Protein" name="protein" min="0" value = "75" required><br>
+            <label for="Carbs">Carbohydrates (grams):</label>
+            <input type="number" id="Carbs" name="carbohydrates" min="0" value = "250" required><br>
+            <label for="Fat">Fat (grams):</label>
+            <input type="number" id="Fat" name="fat" min="0" value = "55" required><br>
 
             <input type="submit" value="Submit" class="button">
         </form>

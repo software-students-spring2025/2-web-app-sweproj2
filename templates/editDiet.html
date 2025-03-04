@@ -22,11 +22,11 @@
           <input type="datetime-local" id="time" name="time" value="{{ doc.date.strftime('%Y-%m-%dT%H:%M') if doc.date else '' }}"><br>
           <label for="Calorie">Calories:</label>
           <input type="number" id="Calorie" name="calories" min="0" value="{{ doc.calories }}"><br>
-          <label for="Protein">Protein:</label>
+          <label for="Protein">Protein (grams):</label>
           <input type="number" id="Protein" name="protein" min="0" value="{{ doc.protein }}"><br>
-          <label for="Carbs">Carbohydrates:</label>
+          <label for="Carbs">Carbohydrates (grams):</label>
           <input type="number" id="Carbs" name="carbohydrates" min="0" value="{{ doc.carbohydrates }}"><br>
-          <label for="Fat">Fat:</label>
+          <label for="Fat">Fat (grams):</label>
           <input type="number" id="Fat" name="fat" min="0" value="{{ doc.fat }}"><br>
 
           <input type="submit" value="Update">
