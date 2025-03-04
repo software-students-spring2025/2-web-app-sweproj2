@@ -12,7 +12,29 @@ Our app allows a user to track their food intake and gym exercises so they can s
 
 ## Steps necessary to run the software
 
-See instructions. Delete this line and place instructions to download, configure, and run the software here.
+1. Create a new file called `.env` in the root directory and copy the environment variables you received into it.
+
+2. Install and run Docker Desktop on your machine
+
+3. Build and start the application using Docker Compose:
+```bash
+docker-compose build
+docker-compose up
+```
+
+4. Open your web browser and navigate to:
+```
+http://localhost:5000
+```
+
+To stop the application:
+1. Press CTRL+C in the terminal where docker-compose is running
+2. Run `docker-compose down` to clean up the containers
+
+## Troubleshooting
+- If you see "port already in use" errors, make sure no other applications are using port 5000
+- If you can't connect to MongoDB, verify your .env file contains the correct MONGO_URI
+- Make sure Docker Desktop is running before trying to start the application
 
 ## Task boards
 
