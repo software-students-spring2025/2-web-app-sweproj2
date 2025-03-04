@@ -1,32 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Welcome , {{ username }}</title>
+    <title>Welcome, {{ username }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-  <body>
-      <header>
-        <h1 class="heading">Welcome, {{ username }}!</h1>
-        <nav>
-          <a href="{{ url_for('home') }}">Home</a>
-          <a href="{{ url_for('workouts') }}">Workouts</a>
-          <a href="{{ url_for('diets') }}">Diet</a>
-          <a href="{{ url_for('settings') }}">Settings</a>
-        </nav>
-      </header>
-      <main>
-        <div class = "infobox">
-            <p>This is going to be information for what workout to do today</p>
-            <a href="{{ url_for('add_workout') }}">Add Workout</a>
+<body>
+    <header>
+        <h1>Welcome, {{ username }}!</h1>
+    </header>
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('workouts') }}">Workouts</a>
+        <a href="{{ url_for('diets') }}">Diet</a>
+        <a href="{{ url_for('settings') }}">Settings</a>
+    </nav>
+    <main>
+        <div class="infobox">
+            <div class="info-content">
+                <h2>Today's Workout</h2>
+                <p>{{ workout_goal }}</p>
+            </div>
+            <div class="info-actions">
+                <a href="{{ url_for('add_workout') }}" class="button">Add Workout</a>
+            </div>
         </div>
-        <div class = "infobox">
-            <p>This is going to be how far you are from your macro goals today</p>
-            <a href="{{ url_for('add_diet') }}">Add Diet</a>
+        <div class="infobox">
+            <div class="info-content">
+                <h2>Today's Diet Goal</h2>
+                <p>{{ diet_goal }}</p>
+            </div>
+            <div class="info-actions">
+                <a href="{{ url_for('add_diet') }}" class="button">Add Diet</a>
+            </div>
         </div>
-      </main>
-      <a href="{{ url_for('logout') }}" class = "logout-btn">Logout</a>
-      <form action="{{ url_for('delete_all_data') }}" method="post">
-          <button type="submit" class="btn btn-danger">Delete All Data</button>
-      </form>
-  </body>
+    </main>
+</body>
 </html>

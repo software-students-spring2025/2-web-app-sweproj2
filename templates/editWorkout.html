@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Edit Workout</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <body>
+        <header>
+          <h1 class="heading">Edit Workout</h1>
+          <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('workouts') }}">Workouts</a>
+            <a href="{{ url_for('diets') }}">Diet</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
+          </nav>
+        </header>
+
+        <form id="submitForm" method="POST" action="{{ url_for('update_workout', post_id=doc._id) }}" class="inputArea">
+          <label for="Workout">Workout Description:</label><br>
+          <input type="text" id="Workout" name="Workout" value="{{ doc.workout_description }}"><br>
+          <label for="time">Time:</label>
+          <input type="datetime-local" id="time" name="time" value="{{ doc.date.strftime('%Y-%m-%dT%H:%M') if doc.date else '' }}"><br>
+          <label for="WorkoutType">Workout Type:</label><br>
+          <select id="WorkoutType" name="WorkoutType">
+            <option value=""></option>
+            <option value="Legs" {% if doc.workout_type == 'Legs' %}selected{% endif %}>Legs</option>
+            <option value="Arms" {% if doc.workout_type == 'Arms' %}selected{% endif %}>Arms</option>
+            <option value="Push" {% if doc.workout_type == 'Push' %}selected{% endif %}>Push</option>
+            <option value="Pull" {% if doc.workout_type == 'Pull' %}selected{% endif %}>Pull</option>
+            <option value="Back" {% if doc.workout_type == 'Back' %}selected{% endif %}>Back</option>
+          </select>
+          <input type="submit" value="Update">
+        </form>
+    </body>
+</html>

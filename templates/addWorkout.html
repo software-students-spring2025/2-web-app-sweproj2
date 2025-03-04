@@ -20,8 +20,8 @@
         <form id="submitForm" method="POST" action="{{ url_for('create_post' , dbType = 'Workouts') }}" class = "inputArea">
           <label for="Workout">Workout Description:</label><br>
           <input type="text" id="Workout" name="Workout"><br>
-          <label for="time">Time:</label>
-          <input type="text" id="time" name="time" placeholder="(Leave blank if current time)"><br>
+          <label for="time">Time (leave blank for current time):</label>
+          <input type="time" id="time" name="time"><br>
           <label for="WorkoutType">Workout Type:</label><br>
           <select id="WorkoutType" name="WorkoutType">
             <option value=""></option>

@@ -61,6 +61,9 @@ def create_app():
         cxn.admin.command("ping")
         print(" *", "Connected to MongoDB!")
         
+        # Create text index for search functionality
+        db.messages.create_index([("workout_description", "text"), ("meal_name", "text")])
+        
     except Exception as e: 
         print(" * MongoDB connection error:", e)
         db = None
@@ -71,7 +74,20 @@ def create_app():
     @app.route("/")
     @login_required
     def home():
-        return render_template('Home.html', username=current_user.username)
+        db = app.config["db"]
+        workout_goal = None
+        diet_goal = None
+        if db is not None:
+            today = datetime.datetime.today().strftime('%A')
+            workout_goal_data = db.messages.find_one({"dbType": "workout_goal", "user": current_user.username, "day": today})
+            if workout_goal_data:
+                workout_goal = workout_goal_data.get("workout_type")
+            
+            diet_goal_data = db.messages.find_one({"dbType": "diet_goal", "user": current_user.username})
+            if diet_goal_data:
+                diet_goal = f"Calories: {diet_goal_data.get('calories')}, Protein: {diet_goal_data.get('protein')}, Carbs: {diet_goal_data.get('carbohydrates')}, Fat: {diet_goal_data.get('fat')}"
+        
+        return render_template('Home.html', username=current_user.username, workout_goal=workout_goal, diet_goal=diet_goal)
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -101,7 +117,10 @@ def create_app():
                     return render_template('signup.html', error="User already exists")
                 hashed_password = generate_password_hash(password)
                 db.users.insert_one({"username": username, "password": hashed_password})
-                return redirect(url_for('onboard'))#return redirect(url_for('onboarding'))
+                user_data = db.users.find_one({"username": username})
+                user = User(id=str(user_data["_id"]), username=username)
+                login_user(user)
+                return redirect(url_for('onboard'))
         return render_template('signup.html')
 
     @app.route("/logout")
@@ -114,21 +133,33 @@ def create_app():
     @login_required
     def workouts():
         db = app.config["db"]
-        sort_order = request.form.get("sort_order", "desc")
-        sort_by = request.form.get("sort_by", "created_at")
-        sort_direction = -1 if sort_order == "desc" else 1
-        docs = db.messages.find({"dbType": "Workouts", "user": current_user.username}).sort(sort_by, sort_direction)
-        return render_template('Workouts.html', docs=docs, sort_order=sort_order, sort_by=sort_by)
+        if db is not None:
+            sort_order = request.form.get("sort_order", "desc")
+            sort_by = request.form.get("sort_by", "created_at")
+            sort_direction = -1 if sort_order == "desc" else 1
+            search_query = request.form.get("search_query", "")
+            query = {"dbType": "Workouts", "user": current_user.username}
+            if search_query:
+                query["$text"] = {"$search": search_query}
+            docs = db.messages.find(query).sort(sort_by, sort_direction)
+            return render_template('Workouts.html', docs=docs, sort_order=sort_order, sort_by=sort_by, search_query=search_query)
+        return render_template('Workouts.html', docs=[], sort_order="desc", sort_by="created_at", search_query="")
     
     @app.route("/diets", methods=["GET", "POST"])
     @login_required
     def diets():
         db = app.config["db"]
-        sort_order = request.form.get("sort_order", "desc")
-        sort_by = request.form.get("sort_by", "created_at")
-        sort_direction = -1 if sort_order == "desc" else 1
-        docs = db.messages.find({"dbType": "diet", "user": current_user.username}).sort(sort_by, sort_direction)
-        return render_template('Diet.html', docs=docs, sort_order=sort_order, sort_by=sort_by)
+        if db is not None:
+            sort_order = request.form.get("sort_order", "desc")
+            sort_by = request.form.get("sort_by", "created_at")
+            sort_direction = -1 if sort_order == "desc" else 1
+            search_query = request.form.get("search_query", "")
+            query = {"dbType": "diet", "user": current_user.username}
+            if search_query:
+                query["$text"] = {"$search": search_query}
+            docs = db.messages.find(query).sort(sort_by, sort_direction)
+            return render_template('Diet.html', docs=docs, sort_order=sort_order, sort_by=sort_by, search_query=search_query)
+        return render_template('Diet.html', docs=[], sort_order="desc", sort_by="created_at", search_query="")
     
     @app.route("/settings")
     @login_required
@@ -196,7 +227,7 @@ def create_app():
     @app.route("/onboarding", methods = ["POST"])
     def onboarding():
         db = app.config['db']
-        if db:
+        if db is not None:
             week = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
             
             for day in week:
@@ -218,7 +249,7 @@ def create_app():
             }
             db.messages.insert_one(diet_data)
 
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
 
     
     @app.route("/showBoth")
@@ -228,22 +259,31 @@ def create_app():
         db = app.config['db']
         if db is not None:
             docs = list(db.messages.find({"user": current_user.username}))
-        return render_template('showBothScreen' , docs = docs) # Add the correct name for template
+            return render_template('showBothScreen', docs=docs)
+        return render_template('showBothScreen', docs=[])
 
     @app.route("/create/<dbType>" , methods=["POST"])
     @login_required
     def create_post(dbType):
         db = app.config['db']
         if db is not None:
+            current_time = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
+            
             if request.form.get("time") == "":
-                    time = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
-            else: 
-                time = datetime.datetime.strptime(request.form.get("time"), "%Y-%m-%d")
+                time = current_time
+            else:
+                # Get just the time from the form and combine with today's date
+                time_str = request.form.get("time")
+                today = current_time.date()
+                try:
+                    time_obj = datetime.datetime.strptime(time_str, "%H:%M").time()
+                    time = datetime.datetime.combine(today, time_obj)
+                except ValueError:
+                    time = current_time
 
-            if dbType == 'Diet': #would it be called diet
+            if dbType == 'Diet':
                 data = {
                     "meal_name": request.form.get("meal_name"),
-                    "time" : request.form.get("time"), 
                     "calories": request.form.get("calories"),
                     "protein": request.form.get("protein"),
                     "carbohydrates": request.form.get("carbohydrates"),
@@ -255,7 +295,7 @@ def create_app():
                 }
                 db.messages.insert_one(data)
                 return redirect(url_for('diets'))
-            elif dbType == 'Workouts': #same question as above
+            elif dbType == 'Workouts':
                 data = {
                     "workout_description": request.form.get("Workout"),
                     "workout_type": request.form.get("WorkoutType"),
@@ -266,6 +306,7 @@ def create_app():
                 }
                 db.messages.insert_one(data)
                 return redirect(url_for('workouts'))
+        return redirect(url_for('home'))
                 
         # Get the values from the fields 
         # Make a document and import it into the Database
@@ -277,7 +318,8 @@ def create_app():
         db = app.config["db"]
         if db is not None:
             docs = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
-        return render_template('editDocument', docs=docs) # Add the correct name for template
+            return render_template('editDocument', docs=docs)
+        return redirect(url_for('showBoth'))
 
     @app.route("/edit/<post_id>/<dbType>" , methods = ["POST"])
     @login_required
@@ -332,6 +374,71 @@ def create_app():
         if db is not None:
             db.messages.delete_many({"user": current_user.username})
         return redirect(url_for('home'))
+
+    @app.route("/edit_workout/<post_id>")
+    @login_required
+    def edit_workout(post_id):
+        db = app.config["db"]
+        if db is not None:
+            doc = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
+            if doc:
+                return render_template('editWorkout.html', doc=doc)
+        return redirect(url_for('workouts'))
+
+    @app.route("/edit_diet/<post_id>")
+    @login_required
+    def edit_diet(post_id):
+        db = app.config["db"]
+        if db is not None:
+            doc = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
+            if doc:
+                return render_template('editDiet.html', doc=doc)
+        return redirect(url_for('diets'))
+
+    @app.route("/update_workout/<post_id>", methods=["POST"])
+    @login_required
+    def update_workout(post_id):
+        db = app.config["db"]
+        if db is not None:
+            if request.form.get("time") == "":
+                time = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
+            else:
+                time = datetime.datetime.strptime(request.form.get("time"), "%Y-%m-%dT%H:%M")
+
+            updated_data = {
+                "workout_description": request.form.get("Workout"),
+                "workout_type": request.form.get("WorkoutType"),
+                "date": time
+            }
+            db.messages.update_one(
+                {"_id": ObjectId(post_id), "user": current_user.username},
+                {"$set": updated_data}
+            )
+        return redirect(url_for('workouts'))
+
+    @app.route("/update_diet/<post_id>", methods=["POST"])
+    @login_required
+    def update_diet(post_id):
+        db = app.config["db"]
+        if db is not None:
+            if request.form.get("time") == "":
+                time = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
+            else:
+                time = datetime.datetime.strptime(request.form.get("time"), "%Y-%m-%dT%H:%M")
+
+            updated_data = {
+                "meal_name": request.form.get("meal_name"),
+                "calories": request.form.get("calories"),
+                "protein": request.form.get("protein"),
+                "carbohydrates": request.form.get("carbohydrates"),
+                "fat": request.form.get("fat"),
+                "date": time
+            }
+            db.messages.update_one(
+                {"_id": ObjectId(post_id), "user": current_user.username},
+                {"$set": updated_data}
+            )
+        return redirect(url_for('diets'))
 
     @app.errorhandler(Exception)
     def handle_error(e): 

@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Workout App</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
-    </head>
-    <body>
-        <header>
-          <h1 class="heading">Workout App</h1>
-          <nav>
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('workouts') }}">Workouts</a>
-            <a href="{{ url_for('diets') }}">Diet</a>
-            <a href="{{ url_for('settings') }}">Settings</a>
-          </nav>
-        </header>
-        
+<head>
+    <title>Workout App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Workout App</h1>
+    </header>
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('workouts') }}">Workouts</a>
+        <a href="{{ url_for('diets') }}">Diet</a>
+        <a href="{{ url_for('settings') }}">Settings</a>
+    </nav>
+    <main>
         <form method="post" action="{{ url_for('workouts') }}" id="sortForm">
             <label for="sort_by">Sort by:</label>
             <select name="sort_by" id="sort_by" onchange="this.form.submit();">
@@ -28,18 +28,27 @@
             </select>
         </form>
 
-      {% for doc in docs %}
-      <div class = "databox"> 
-        <a href="{{ url_for('deleteWorkout', post_id=doc._id)}}"> Delete</a>
-        <h2 >{{doc.workout_description}}</h2>
-          <h3>{{doc.date.strftime("%d %B %Y %H:%M:%S")}}</h3>
-          <p>{{doc.workout_type}}</p>
-      </div>
-      {%endfor%}
+        <form method="post" action="{{ url_for('workouts') }}">
+            <input type="text" name="search_query" placeholder="Search workouts" value="{{ search_query }}">
+            <button type="submit" class="button">Search</button>
+        </form>
 
+        {% for doc in docs %}
+        <div class="databox">
+            <div class="data-content">
+                <h2>{{ doc.workout_description }}</h2>
+                <h3>{{ doc.date.strftime("%d %B %Y %H:%M:%S") }}</h3>
+                <p>{{ doc.workout_type }}</p>
+            </div>
+            <div class="data-actions">
+                <a href="{{ url_for('edit_workout', post_id=doc._id)}}" class="button">Edit</a>
+                <a href="{{ url_for('deleteWorkout', post_id=doc._id)}}" class="button">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    </main>
     <footer>
-    <a href="{{url_for('add_workout')}}" class = "circleButton add">Add</a>
-    <a href="" class = "circleButton edit">Edit</a>
+        <a href="{{ url_for('add_workout') }}" class="circleButton add">+</a>
     </footer>
-    </body>
+</body>
 </html>

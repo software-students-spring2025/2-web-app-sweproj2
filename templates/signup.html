@@ -2,23 +2,31 @@
 <html>
 <head>
     <title>Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Sign Up</h1>
-    <form method="POST" action="{{ url_for('signup') }}">
-        <div>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit">Sign Up</button>
-    </form>
-    {% if error %}
-    <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    <a href="{{ url_for('login') }}">Already have an account? Login here</a>
+    <header>
+        <h1>Sign Up</h1>
+    </header>
+    <main>
+        <form method="POST" action="{{ url_for('signup') }}">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="button">Sign Up</button>
+        </form>
+        {% if error %}
+        <p style="color: red;">{{ error }}</p>
+        {% endif %}
+        <a href="{{ url_for('login') }}">Already have an account? Login here</a>
+    </main>
+    <footer>
+        &copy; 2023 Workout App
+    </footer>
 </body>
 </html>
