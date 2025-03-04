@@ -40,7 +40,9 @@
         {% for doc in docs %}
         <div class = "databox"> 
             <h2 >{{doc.meal_name}}</h2>
+            {% if doc.date %}
             <h3>{{doc.date.strftime("%d %B %Y %H:%M:%S")}}</h3>
+            {% endif %}
             <div style="text-align: left; line-height: 25%;">
                 <h3>Calories: {{doc.calories}}</h3>
                 <p>Protein: {{doc.protein}}</p>

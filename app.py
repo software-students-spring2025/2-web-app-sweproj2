@@ -104,7 +104,10 @@ def create_app():
                     return render_template('signup.html', error="User already exists")
                 hashed_password = generate_password_hash(password)
                 db.users.insert_one({"username": username, "password": hashed_password})
-                return redirect(url_for('onboard'))#return redirect(url_for('onboarding'))
+                user_data = db.users.find_one({"username": username})
+                user = User(id=str(user_data["_id"]), username=username)
+                login_user(user)
+                return redirect(url_for('onboard'))
         return render_template('signup.html')
 
     @app.route("/logout")
@@ -117,29 +120,33 @@ def create_app():
     @login_required
     def workouts():
         db = app.config["db"]
-        sort_order = request.form.get("sort_order", "desc")
-        sort_by = request.form.get("sort_by", "created_at")
-        sort_direction = -1 if sort_order == "desc" else 1
-        search_query = request.form.get("search_query", "")
-        query = {"dbType": "Workouts", "user": current_user.username}
-        if search_query:
-            query["$text"] = {"$search": search_query}
-        docs = db.messages.find(query).sort(sort_by, sort_direction)
-        return render_template('Workouts.html', docs=docs, sort_order=sort_order, sort_by=sort_by, search_query=search_query)
+        if db is not None:
+            sort_order = request.form.get("sort_order", "desc")
+            sort_by = request.form.get("sort_by", "created_at")
+            sort_direction = -1 if sort_order == "desc" else 1
+            search_query = request.form.get("search_query", "")
+            query = {"dbType": "Workouts", "user": current_user.username}
+            if search_query:
+                query["$text"] = {"$search": search_query}
+            docs = db.messages.find(query).sort(sort_by, sort_direction)
+            return render_template('Workouts.html', docs=docs, sort_order=sort_order, sort_by=sort_by, search_query=search_query)
+        return render_template('Workouts.html', docs=[], sort_order="desc", sort_by="created_at", search_query="")
     
     @app.route("/diets", methods=["GET", "POST"])
     @login_required
     def diets():
         db = app.config["db"]
-        sort_order = request.form.get("sort_order", "desc")
-        sort_by = request.form.get("sort_by", "created_at")
-        sort_direction = -1 if sort_order == "desc" else 1
-        search_query = request.form.get("search_query", "")
-        query = {"dbType": "diet", "user": current_user.username}
-        if search_query:
-            query["$text"] = {"$search": search_query}
-        docs = db.messages.find(query).sort(sort_by, sort_direction)
-        return render_template('Diet.html', docs=docs, sort_order=sort_order, sort_by=sort_by, search_query=search_query)
+        if db is not None:
+            sort_order = request.form.get("sort_order", "desc")
+            sort_by = request.form.get("sort_by", "created_at")
+            sort_direction = -1 if sort_order == "desc" else 1
+            search_query = request.form.get("search_query", "")
+            query = {"dbType": "diet", "user": current_user.username}
+            if search_query:
+                query["$text"] = {"$search": search_query}
+            docs = db.messages.find(query).sort(sort_by, sort_direction)
+            return render_template('Diet.html', docs=docs, sort_order=sort_order, sort_by=sort_by, search_query=search_query)
+        return render_template('Diet.html', docs=[], sort_order="desc", sort_by="created_at", search_query="")
     
     @app.route("/settings")
     @login_required
@@ -163,7 +170,7 @@ def create_app():
     @app.route("/onboarding", methods = ["POST"])
     def onboarding():
         db = app.config['db']
-        if db:
+        if db is not None:
             week = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
             
             for day in week:
@@ -185,7 +192,7 @@ def create_app():
             }
             db.messages.insert_one(diet_data)
 
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
 
     
     @app.route("/showBoth")
@@ -195,7 +202,8 @@ def create_app():
         db = app.config['db']
         if db is not None:
             docs = list(db.messages.find({"user": current_user.username}))
-        return render_template('showBothScreen' , docs = docs) # Add the correct name for template
+            return render_template('showBothScreen', docs=docs)
+        return render_template('showBothScreen', docs=[])
 
     @app.route("/create/<dbType>" , methods=["POST"])
     @login_required
@@ -233,6 +241,7 @@ def create_app():
                 }
                 db.messages.insert_one(data)
                 return redirect(url_for('workouts'))
+        return redirect(url_for('home'))
                 
         # Get the values from the fields 
         # Make a document and import it into the Database
@@ -244,7 +253,8 @@ def create_app():
         db = app.config["db"]
         if db is not None:
             docs = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
-        return render_template('editDocument', docs=docs) # Add the correct name for template
+            return render_template('editDocument', docs=docs)
+        return redirect(url_for('showBoth'))
 
     @app.route("/edit/<post_id>/<dbType>" , methods = ["POST"])
     @login_required
