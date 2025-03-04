@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Diet App</title>
+    <title>Diet</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <header>
-        <h1>Diet App</h1>
+        <h1>Diet</h1>
     </header>
     <nav>
         <a href="{{ url_for('home') }}">Home</a>
@@ -46,9 +46,9 @@
                 {% endif %}
                 <div class="stats">
                     <h3>Calories: {{ doc.calories }}</h3>
-                    <p>Protein: {{ doc.protein }}</p>
-                    <p>Carbohydrates: {{ doc.carbohydrates }}</p>
-                    <p>Fat: {{ doc.fat }}</p>
+                    <p>Protein: {{ doc.protein }}g</p>
+                    <p>Carbohydrates: {{ doc.carbohydrates }}g</p>
+                    <p>Fat: {{ doc.fat }}g</p>
                 </div>
             </div>
             <div class="data-actions">

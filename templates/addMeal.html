@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Workout App</title>
+        <title>Diet</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
     <body>
         <header>
-          <h1 class="heading">Workout App</h1>
+          <h1 class="heading">Diet</h1>
           <nav>
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('workouts') }}">Workouts</a>
@@ -24,11 +24,11 @@
           <input type="time" id="time" name="time"><br>
           <label for="Calorie">Calories:</label>
           <input type="number" id="Calorie" name="calories" min="0"><br>
-          <label for="Protein">Protein:</label>
+          <label for="Protein">Protein (grams):</label>
           <input type="number" id="Protein" name="protein" min="0"><br>
-          <label for="Carbs">Carbohydrates:</label>
+          <label for="Carbs">Carbohydrates (grams):</label>
           <input type="number" id="Carbs" name="carbohydrates" min="0"><br>
-          <label for="Fat">Fat:</label>
+          <label for="Fat">Fat (grams):</label>
           <input type="number" id="Fat" name="fat" min="0"><br>
 
           <input type="submit" value="Submit">
