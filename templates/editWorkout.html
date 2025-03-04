@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome , {{ username }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header>
+    <h1 class="heading">Welcome, {{ username }}!</h1>
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('workouts') }}">Workouts</a>
+        <a href="{{ url_for('diets') }}">Diet</a>
+        <a href="{{ url_for('settings') }}">Settings</a>
+    </nav>
+</header>
+<form id="submitForm" method="POST" action="{{ url_for('editPostWorkout', post_id=doc._id) }}"" class = "inputArea">
+    <label for="Workout">Workout Description:</label><br>
+    <input type="text" id="Workout" name="Workout" value="{{doc.workout_description}}"><br>
+    <label for="time">Time:</label>
+    <input type="datetime-local" id="time" name="time" value = "{{doc.date}}"><br>
+    <label for="WorkoutType">Workout Type:</label><br>
+    <select id="WorkoutType" name="WorkoutType" value = "{{doc.workout_type}}"> 
+      <option value=""></option>
+      <option value="Legs">Legs</option>
+      <option value="Arms">Arms</option>
+      <option value="Push">Push</option>
+      <option value="Pull">Pull</option>
+      <option value="Back">Back</option>
+    </select>
+    <br>
+    <br>
+    <br>
+    <input type="submit" value="Submit">
+  </form>
+
+</body>
+
+
+</html>

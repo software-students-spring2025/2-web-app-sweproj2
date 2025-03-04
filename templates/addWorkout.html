@@ -19,9 +19,9 @@
 
         <form id="submitForm" method="POST" action="{{ url_for('create_post' , dbType = 'Workouts') }}" class = "inputArea">
           <label for="Workout">Workout Description:</label><br>
-          <input type="text" id="Workout" name="Workout"><br>
+          <input type="text" id="Workout" name="Workout" required><br>
           <label for="time">Time:</label>
-          <input type="text" id="time" name="time" placeholder="(Leave blank if current time)"><br>
+          <input type="datetime-local" id="time" name="time"><br>
           <label for="WorkoutType">Workout Type:</label><br>
           <select id="WorkoutType" name="WorkoutType">
             <option value=""></option>
@@ -39,24 +39,6 @@
         
         <script>
           document.getElementById("submitForm").addEventListener("submit", function(event) {
-            let dateInput = document.getElementById("time").value;
-            
-            let pattern = /^\d{4}-\d{2}-\d{2}$/;
-
-            if ((!pattern.test(dateInput)) && dateInput != ""){
-              alert("Invalid date format! Please enter in YYYY-MM-DD format."); 
-              event.preventDefault(); 
-            }
-            else if (dateInput != ""){
-              let dateObject = new Date(dateInput);
-              let [year, month, day] = dateInput.split("-").map(Number);
-
-              if ((dateObject.getFullYear() != year) || (dateObject.getMonth() + 1 != month) || (dateObject.getDate() != day)){
-                alert("Invalid date format! Please enter in YYYY-MM-DD format."); 
-                event.preventDefault(); 
-              }
-            }
-
 
             if (document.getElementById("WorkoutType").value == ""){
                 alert("Please select a type!"); 

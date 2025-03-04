@@ -220,16 +220,6 @@ def create_app():
 
         return redirect(url_for('login'))
 
-    
-    @app.route("/showBoth")
-    @login_required
-    def showBoth():
-        # Add correct Database call (get all docs in the database to display)
-        db = app.config['db']
-        if db is not None:
-            docs = list(db.messages.find({"user": current_user.username}))
-        return render_template('showBothScreen' , docs = docs) # Add the correct name for template
-
     @app.route("/create/<dbType>" , methods=["POST"])
     @login_required
     def create_post(dbType):
@@ -270,14 +260,51 @@ def create_app():
         # Get the values from the fields 
         # Make a document and import it into the Database
 
-    @app.route("/edit/<post_id>")
+    @app.route("/editWorkout/<post_id>")
     @login_required
-    def edit(post_id): 
-        # Add correct Database call (Find the document from Database from the post_id)
+    def editWorkout(post_id): 
         db = app.config["db"]
-        if db is not None:
-            docs = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
-        return render_template('editDocument', docs=docs) # Add the correct name for template
+        doc = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
+        return render_template('editWorkout.html', doc=doc)
+    
+    @app.route("/editPostWorkout/<post_id>", methods = ["POST"])
+    @login_required
+    def editPostWorkout(post_id):
+        db = app.config["db"]
+        updated_data = {
+                    "workout_description": request.form.get("Workout"),
+                    "workout_type": request.form.get("WorkoutType"),
+                    "date": request.form.get("time"),
+                    "user": current_user.username
+                }
+        db.messages.update_one({"_id": ObjectId(post_id)}, {"$set": updated_data})
+        return redirect(url_for('workouts'))
+
+    @app.route("/editMeal/<post_id>")
+    @login_required
+    def editMeal(post_id): 
+        db = app.config["db"]
+        doc = db.messages.find_one({"_id": ObjectId(post_id), "user": current_user.username})
+        return render_template('editMeal.html', doc=doc)
+    
+    @app.route("/editPostMeal/<post_id>", methods = ["POST"])
+    @login_required
+    def editPostMeal(post_id):
+        db = app.config["db"]
+        updated_data = {
+                    "meal_name": request.form.get("meal_name"),
+                    "calories": request.form.get("calories"),
+                    "protein": request.form.get("protein"),
+                    "carbohydrates": request.form.get("carbohydrates"),
+                    "fat": request.form.get("fat"),
+                    "dbType": "diet",
+                    "user": current_user.username,
+                    "date": request.form.get("time"),
+                    "user": current_user.username
+                }
+        db.messages.update_one({"_id": ObjectId(post_id)}, {"$set": updated_data})
+        return redirect(url_for('diets'))
+
 
     @app.route("/edit/<post_id>/<dbType>" , methods = ["POST"])
     @login_required
@@ -288,14 +315,7 @@ def create_app():
         if db is not None:
             if dbType == 'Diet': 
                 updated_data = {
-                    "meal_name": request.form.get("meal_name"),
-                    "date_time": request.form.get("datetime"),
-                    "calories": request.form.get("calories"),
-                    "protein": request.form.get("protein"),
-                    "carbohydrates": request.form.get("carbohydrates"),
-                    "fat": request.form.get("fat"),
-                    "dbType": "diet",
-                    "user": current_user.username
+
                 }
             elif dbType == 'Workouts': 
                 updated_data = {

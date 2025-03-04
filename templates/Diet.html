@@ -35,8 +35,9 @@
         {% for doc in docs %}
         <div class = "databox"> 
             <a href="{{ url_for('deleteDiet', post_id=doc._id)}}"> Delete</a>
+            <a href="{{ url_for('editMeal', post_id=doc._id)}}"> Edit</a>
             <h2 >{{doc.meal_name}}</h2>
-            <h3>{{doc.date.strftime("%d %B %Y %H:%M:%S")}}</h3>
+            <h3>{{doc.date}}</h3>
             <div style="text-align: left; line-height: 25%;">
                 <h3>Calories: {{doc.calories}}</h3>
                 <p>Protein: {{doc.protein}}</p>
